@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Alignment Compass</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      text-align: center;
+      position: relative;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 4px;
+      position: relative;
+    }
+
+    .cell {
+      background: #222;
+      border: 2px solid #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      position: relative;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+
+    .cell.highlight {
+      border-color: #0f0;
+    }
+
+    .token {
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle, #0ff 30%, #00ffff11 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 10px #0ff, 0 0 20px #0ff77f;
+      position: absolute;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 5;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px #0ff, 0 0 20px #0ff77f;
+      }
+      50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px #0ff, 0 0 30px #0ff88f;
+      }
+    }
+
+    .selected {
+      margin-top: 12px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="grid" id="alignmentGrid"></div>
+    <div class="token" id="token"></div>
+    <div class="selected" id="selectedAlignment">Select an alignment</div>
+  </div>
+  <script>
+    const alignments = [
+      "Lawful Good", "Neutral Good", "Chaotic Good",
+      "Lawful Neutral", "True Neutral", "Chaotic Neutral",
+      "Lawful Evil", "Neutral Evil", "Chaotic Evil"
+    ];
+
+    const grid = document.getElementById("alignmentGrid");
+    const token = document.getElementById("token");
+    const selectedText = document.getElementById("selectedAlignment");
+
+    alignments.forEach((name) => {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.dataset.alignment = name;
+      cell.textContent = name;
+
+      cell.addEventListener("click", () => {
+        // Remove highlight from all
+        document.querySelectorAll(".cell").forEach(c => c.classList.remove("highlight"));
+        // Highlight selected
+        cell.classList.add("highlight");
+        selectedText.textContent = name;
+
+        // Move token to this cell
+        const rect = cell.getBoundingClientRect();
+        const containerRect = grid.getBoundingClientRect();
+        const offsetX = rect.left - containerRect.left + rect.width / 2 - 15;
+        const offsetY = rect.top - containerRect.top + rect.height / 2 - 15;
+        token.style.left = `${offsetX}px`;
+        token.style.top = `${offsetY}px`;
+      });
+
+      grid.appendChild(cell);
+    });
+
+    // Set initial position off-screen
+    token.style.left = "-999px";
+    token.style.top = "-999px";
+  </script>
+</body>
+</html>
