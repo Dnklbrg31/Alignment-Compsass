@@ -2,124 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alignment Compass</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #111;
+      background: #0d0d0d;
+      font-family: 'Cinzel', serif;
       color: white;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
       margin: 0;
-    }
-
-    .container {
-      text-align: center;
-      position: relative;
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 100px);
       grid-template-rows: repeat(3, 100px);
-      gap: 4px;
+      gap: 10px;
       position: relative;
     }
 
     .cell {
-      background: #222;
-      border: 2px solid #444;
       display: flex;
-      align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
-      position: relative;
-      transition: border-color 0.2s;
+      align-items: center;
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px;
       cursor: pointer;
+      background: #222;
+      border-radius: 8px;
+      transition: transform 0.2s, box-shadow 0.4s ease;
+      box-shadow: 0 0 5px rgba(255,255,255,0.1);
+      position: relative;
     }
 
-    .cell.highlight {
-      border-color: #0f0;
+    .cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 14px rgba(255,255,255,0.5);
     }
 
-    .token {
+    .orb {
+      position: absolute;
       width: 30px;
       height: 30px;
-      background: radial-gradient(circle, #0ff 30%, #00ffff11 100%);
       border-radius: 50%;
-      box-shadow: 0 0 10px #0ff, 0 0 20px #0ff77f;
-      position: absolute;
-      transition: all 0.3s ease;
+      background: var(--orb-color, white);
+      box-shadow: 0 0 20px 6px var(--orb-color, white);
       pointer-events: none;
-      z-index: 5;
-      animation: pulse 2s infinite;
+      transition: top 0.3s, left 0.3s, background 0.3s, box-shadow 0.3s;
+      z-index: 10;
+      display: none;
     }
 
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 10px #0ff, 0 0 20px #0ff77f;
-      }
-      50% {
-        transform: scale(1.1);
-        box-shadow: 0 0 20px #0ff, 0 0 30px #0ff88f;
-      }
-    }
-
-    .selected {
-      margin-top: 12px;
-      font-size: 1rem;
-    }
+    .lawful-good     { --orb-color: #81c784; }
+    .neutral-good    { --orb-color: #aed581; }
+    .chaotic-good    { --orb-color: #dce775; }
+    .lawful-neutral  { --orb-color: #64b5f6; }
+    .true-neutral    { --orb-color: #b0bec5; }
+    .chaotic-neutral { --orb-color: #4dd0e1; }
+    .lawful-evil     { --orb-color: #ba68c8; }
+    .neutral-evil    { --orb-color: #f06292; }
+    .chaotic-evil    { --orb-color: #ef5350; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="grid" id="alignmentGrid"></div>
-    <div class="token" id="token"></div>
-    <div class="selected" id="selectedAlignment">Select an alignment</div>
+  <div class="grid">
+    <div class="orb" id="orb"></div>
+    <div class="cell lawful-good">Lawful<br>Good</div>
+    <div class="cell neutral-good">Neutral<br>Good</div>
+    <div class="cell chaotic-good">Chaotic<br>Good</div>
+
+    <div class="cell lawful-neutral">Lawful<br>Neutral</div>
+    <div class="cell true-neutral">True<br>Neutral</div>
+    <div class="cell chaotic-neutral">Chaotic<br>Neutral</div>
+
+    <div class="cell lawful-evil">Lawful<br>Evil</div>
+    <div class="cell neutral-evil">Neutral<br>Evil</div>
+    <div class="cell chaotic-evil">Chaotic<br>Evil</div>
   </div>
+
   <script>
-    const alignments = [
-      "Lawful Good", "Neutral Good", "Chaotic Good",
-      "Lawful Neutral", "True Neutral", "Chaotic Neutral",
-      "Lawful Evil", "Neutral Evil", "Chaotic Evil"
-    ];
+    const cells = document.querySelectorAll('.cell');
+    const orb = document.getElementById('orb');
 
-    const grid = document.getElementById("alignmentGrid");
-    const token = document.getElementById("token");
-    const selectedText = document.getElementById("selectedAlignment");
-
-    alignments.forEach((name) => {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      cell.dataset.alignment = name;
-      cell.textContent = name;
-
-      cell.addEventListener("click", () => {
-        // Remove highlight from all
-        document.querySelectorAll(".cell").forEach(c => c.classList.remove("highlight"));
-        // Highlight selected
-        cell.classList.add("highlight");
-        selectedText.textContent = name;
-
-        // Move token to this cell
+    cells.forEach(cell => {
+      cell.addEventListener('click', () => {
         const rect = cell.getBoundingClientRect();
-        const containerRect = grid.getBoundingClientRect();
-        const offsetX = rect.left - containerRect.left + rect.width / 2 - 15;
-        const offsetY = rect.top - containerRect.top + rect.height / 2 - 15;
-        token.style.left = `${offsetX}px`;
-        token.style.top = `${offsetY}px`;
+        const parentRect = cell.parentElement.getBoundingClientRect();
+        const offsetTop = rect.top - parentRect.top;
+        const offsetLeft = rect.left - parentRect.left;
+
+        orb.style.top = `${offsetTop + rect.height / 2 - 15}px`;
+        orb.style.left = `${offsetLeft + rect.width / 2 - 15}px`;
+        orb.style.setProperty('--orb-color', getComputedStyle(cell).getPropertyValue('--orb-color'));
+        orb.style.display = 'block';
       });
-
-      grid.appendChild(cell);
     });
-
-    // Set initial position off-screen
-    token.style.left = "-999px";
-    token.style.top = "-999px";
   </script>
 </body>
 </html>
